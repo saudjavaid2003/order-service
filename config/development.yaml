@@ -2,8 +2,10 @@ server:
   port: 5503
   host: localhost
 auth:
-  jwksUri: "http://localhost:5000/.well-known/jwks.json"
+  jwksUri: http://localhost:5000/.well-known/jwks.json
 database:
   url: mongodb://localhost:27017/order-service
 frontend:
-  clientUi: "http://localhost:3000"
+  clientUi: 'http://localhost:3000'
+kafka:
+ broker: 'localhost:9092'
