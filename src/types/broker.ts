@@ -6,3 +6,4 @@ export interface MessageBroker {
   disconnectConsumer: () => Promise<void>;
   consumeMessage: (topics: string[], fromBeginning: boolean) => Promise<void>;
 }
+

@@ -10,7 +10,11 @@ export class KafkaBroker implements MessageBroker {
     const kafka = new Kafka({ clientId, brokers });
 
     this.consumer = kafka.consumer({ groupId: clientId });
+    // this is because when i deploy to the cloud if have multiple isntances 
+    // then all the instances will be in the same group 
+    // and kafka will take care of load balancing the messages between them.
   }
+  
 
   /**
    * Connect the consumer
