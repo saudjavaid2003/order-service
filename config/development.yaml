@@ -9,3 +9,5 @@ frontend:
   clientUi: 'http://localhost:3000'
 kafka:
   broker: 'localhost:9092'
+stripe:
+  secretKey: 'sk_test_51TV1z92z5lzN9eXqRtHkWsG4l2mZxddZCAq50fU2NLVYuR1oVeRxo1l8m4ChmgHitn1x86XF3abICkZpIoD10Ak800FdvSZSbN'
