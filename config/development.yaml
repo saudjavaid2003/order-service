@@ -4,8 +4,8 @@ server:
 auth:
   jwksUri: http://localhost:5000/.well-known/jwks.json
 database:
-  url: mongodb://localhost:27017/order-service
+  url: mongodb+srv://saudjavaid2003_db_user:Z1YoAQM5mUUXofVj@cluster0.mcmgqnl.mongodb.net/order?appName=Cluster0
 frontend:
   clientUi: 'http://localhost:3000'
 kafka:
- broker: 'localhost:9092'
+  broker: 'localhost:9092'
