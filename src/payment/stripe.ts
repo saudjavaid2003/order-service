@@ -10,6 +10,7 @@ import {
 export class StripeGW implements PaymentGW {
   private stripe: Stripe.Stripe;
 
+
   constructor() {
     this.stripe = new Stripe(config.get("stripe.secretKey"));
   }
@@ -19,8 +20,11 @@ export class StripeGW implements PaymentGW {
       {
         // todo: get customer email from database
         // customer_email: options.email
+        // pata nai kioun lekin tenantId METADATA KAY ender pass kerni prhni rahi ha 
+        
         metadata: {
           orderId: options.orderId,
+          restaurantId: options.tenantId,
         },
         billing_address_collection: "required",
         // todo: In Future, Capture structured address from customer
@@ -50,8 +54,8 @@ export class StripeGW implements PaymentGW {
           },
         ],
         mode: "payment",
-        success_url: `${config.get("frontend.clientUi")}/payment?sucess=true&orderId=${options.orderId}`,
-        cancel_url: `${config.get("frontend.clientUi")}/payment?sucess=false&orderId=${options.orderId}`,
+        success_url: `${config.get("frontend.clientUi")}/payment?success=true&orderId=${options.orderId}&restaurantId=${options.tenantId}`,
+        cancel_url: `${config.get("frontend.clientUi")}/payment?success=false&orderId=${options.orderId}&restaurantId=${options.tenantId}`,
       },
       { idempotencyKey: options.idempotenencyKey },
     );
