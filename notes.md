@@ -31,3 +31,12 @@ solution i am doing for that is if the payment url is null in the repsosne then 
 
 ek aur chz ab kerni paray ghi webhook recieve kerni ha 
 payment successful honay per
+
+
+ todo 
+ wo getmyorders ka endpoint banana ha 
+ek czh ha wo ya ha kay customer jo wo user say connected ha auth servive walay sya yani customer collection kay ender userId ha to ma kia kaorun gha 
+ma nay jwt token kay ender userId to dhali hoi ha wahan say req.auth say id lay ker jaoun gha aur orders nikal loun gha 
+yahan per pagination laghani ha lekin wo end per karian ghay 
+abhi full working project dikhana ha sir ko cart ko response may nai bhejna 
+gend mach jay gha frontend per
