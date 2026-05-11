@@ -3,7 +3,7 @@ import config from "config";
 import { PaymentGW, PaymentOptions } from "./paymentTypes";
 
 export class StripeGW implements PaymentGW {
-  private stripe: Stripe.Stripe;  // ← fix here, was just Stripe
+  private stripe: Stripe.Stripe;
 
   constructor() {
     this.stripe = new Stripe(config.get("stripe.secretKey"));
@@ -12,9 +12,24 @@ export class StripeGW implements PaymentGW {
   async createSession(options: PaymentOptions) {
     const session = await this.stripe.checkout.sessions.create(
       {
+        // todo: get customer email from database
+        // customer_email: options.email
         metadata: {
           orderId: options.orderId,
         },
+        billing_address_collection: "required",
+        // todo: In Future, Capture structured address from customer
+        // payment_intent_data: {
+        //     shipping: {
+        //         name: "Rakesh K",
+        //         address: {
+        //             line1: "some line",
+        //             city: "Mumbai",
+        //             country: "India",
+        //             postal_code: "898798"
+        //         }
+        //     }
+        // },
         line_items: [
           {
             price_data: {
@@ -24,14 +39,14 @@ export class StripeGW implements PaymentGW {
                 description: "Total amount to be paid",
                 images: ["https://placehold.jp/150x150.png"],
               },
-              currency: options.currency || "usd",  // changed euro  to usd
+              currency: options.currency || "usd",
             },
             quantity: 1,
           },
         ],
         mode: "payment",
-        success_url: `${config.get("frontend.clientUi")}/payment?sucess=true&orderId=${options.orderId}`,
-        cancel_url: `${config.get("frontend.clientUi")}/payment?sucess=false&orderId=${options.orderId}`,
+        success_url: `${config.get("frontend.clientUI")}/payment?sucess=true&orderId=${options.orderId}`,
+        cancel_url: `${config.get("frontend.clientUI")}/payment?sucess=false&orderId=${options.orderId}`,
       },
       { idempotencyKey: options.idempotenencyKey },
     );
