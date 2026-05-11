@@ -1,6 +1,11 @@
 import Stripe from "stripe";
 import config from "config";
-import { PaymentGW, PaymentOptions } from "./paymentTypes";
+import {
+  CustomMetadata,
+  PaymentGW,
+  PaymentOptions,
+  VerifiedSession,
+} from "./paymentTypes";
 
 export class StripeGW implements PaymentGW {
   private stripe: Stripe.Stripe;
@@ -45,8 +50,8 @@ export class StripeGW implements PaymentGW {
           },
         ],
         mode: "payment",
-        success_url: `${config.get("frontend.clientUI")}/payment?sucess=true&orderId=${options.orderId}`,
-        cancel_url: `${config.get("frontend.clientUI")}/payment?sucess=false&orderId=${options.orderId}`,
+        success_url: `${config.get("frontend.clientUi")}/payment?sucess=true&orderId=${options.orderId}`,
+        cancel_url: `${config.get("frontend.clientUi")}/payment?sucess=false&orderId=${options.orderId}`,
       },
       { idempotencyKey: options.idempotenencyKey },
     );
@@ -58,7 +63,15 @@ export class StripeGW implements PaymentGW {
     };
   }
 
-  async getSession() {
-    return null;
+  async getSession(id: string) {
+    const session = await this.stripe.checkout.sessions.retrieve(id);
+
+    const verifiedSession: VerifiedSession = {
+      id: session.id,
+      paymentStatus: session.payment_status,
+      metadata: session.metadata as unknown as CustomMetadata,
+    };
+
+    return verifiedSession;
   }
 }

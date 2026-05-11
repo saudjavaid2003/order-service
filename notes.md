@@ -22,3 +22,12 @@ if scccuess redirect to success page with the a toast message
 5then we will get a webhook alogn with orderId then we will change the order status 
 6 and then push the message to kafka broker for consumer s
 7 consumers will be notification service and web sockets service 
+
+
+8 also check if the payment mode is cash then dont redirect it
+solution i am doing for that is if the payment url is null in the repsosne then i will not redirect him 
+
+
+
+ek aur chz ab kerni paray ghi webhook recieve kerni ha 
+payment successful honay per
