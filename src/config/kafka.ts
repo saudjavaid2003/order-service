@@ -1,20 +1,18 @@
-import { Consumer, EachMessagePayload, Kafka } from "kafkajs";
+import { Consumer, EachMessagePayload, Kafka, Producer } from "kafkajs";
 import { MessageBroker } from "../types/broker";
 import { handleProductUpdate } from "../productCache/productUpdateHandler";
 import { handleToppingUpdate } from "../topppingCache/toppingUpdateHandler";
 
 export class KafkaBroker implements MessageBroker {
   private consumer: Consumer;
+  private producer: Producer;
 
   constructor(clientId: string, brokers: string[]) {
     const kafka = new Kafka({ clientId, brokers });
 
+    this.producer = kafka.producer();
     this.consumer = kafka.consumer({ groupId: clientId });
-    // this is because when i deploy to the cloud if have multiple isntances 
-    // then all the instances will be in the same group 
-    // and kafka will take care of load balancing the messages between them.
   }
-  
 
   /**
    * Connect the consumer
@@ -24,10 +22,39 @@ export class KafkaBroker implements MessageBroker {
   }
 
   /**
+   * Connect the producer
+   */
+  async connectProducer() {
+    await this.producer.connect();
+  }
+
+  /**
    * Disconnect the consumer
    */
   async disconnectConsumer() {
     await this.consumer.disconnect();
+  }
+
+  /**
+   * Disconnect the producer
+   */
+  async disconnectProducer() {
+    if (this.producer) {
+      await this.producer.disconnect();
+    }
+  }
+
+  /**
+   *
+   * @param topic - the topic to send the message to
+   * @param message - The message to send
+   * @throws {Error} - When the producer is not connected
+   */
+  async sendMessage(topic: string, message: string) {
+    await this.producer.send({
+      topic,
+      messages: [{ value: message }],
+    });
   }
 
   async consumeMessage(topics: string[], fromBeginning: boolean = false) {

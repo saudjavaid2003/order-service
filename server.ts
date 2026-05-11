@@ -12,8 +12,11 @@ const startServer = async () => {
   try {
     await connectDB();
     broker = createMessageBroker();
+    await broker.connectProducer();
+
     await broker.connectConsumer();
     await broker.consumeMessage(["product", "topping"], false);
+
     app
       .listen(PORT, () => console.log(`Listening on port ${PORT}`))
       .on("error", (err) => {
@@ -23,6 +26,7 @@ const startServer = async () => {
   } catch (err) {
     logger.error("Error happened: ", err.message);
     if (broker) {
+      await broker.disconnectProducer();
       await broker.disconnectConsumer();
     }
     process.exit(1);
