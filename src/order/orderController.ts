@@ -1,4 +1,3 @@
-
 import { NextFunction, Request, Response } from "express";
 import { Request as AuthRequest } from "express-jwt";
 import {
@@ -108,12 +107,6 @@ export class OrderController {
       }
     }
 
-    // Payment processing...
-
-    // todo: Error handling...
-
-    // todo: add logging
-
     if (paymentMode === PaymentMode.CARD) {
       const session = await this.paymentGw.createSession({
         amount: finalTotal,
@@ -130,7 +123,6 @@ export class OrderController {
 
     await this.broker.sendMessage("order", JSON.stringify(newOrder));
 
-    // todo: Update order document -> paymentId -> sessionId
     return res.json({ paymentUrl: null });
   };
 
@@ -140,36 +132,34 @@ export class OrderController {
     if (!userId) {
       return next(createHttpError(400, "No userId found."));
     }
+    console.log("userId from token:", userId);
 
-    // todo: Add error handling.
     const customer = await customerModel.findOne({ userId });
+    console.log("customer found:", customer);
 
     if (!customer) {
       return next(createHttpError(400, "No customer found."));
     }
 
-    // todo: implement pagination.
     const orders = await orderModel.find(
       { customerId: customer._id },
       { cart: 0 },
     );
+    console.log("orders found:", orders);
 
     return res.json(orders);
   };
 
   private calculateTotal = async (cart: CartItem[]) => {
     const productIds = cart.map((item) => item._id);
+    console.log("Cart productIds:", productIds);
 
-    // todo: proper error handling..
     const productPricings = await productCacheModel.find({
       productId: {
         $in: productIds,
       },
     });
-
-    // todo: What will happen if product does not exists in the cache
-    // 1. call catalog service.
-    // 2. Use price from cart <- BAD
+    console.log("productPricings found:", JSON.stringify(productPricings));
 
     const cartToppingIds = cart.reduce((acc, item) => {
       return [
@@ -179,17 +169,22 @@ export class OrderController {
         ),
       ];
     }, []);
+    console.log("cartToppingIds:", cartToppingIds);
 
-    // todo: What will happen if topping does not exists in the cache
     const toppingPricings = await toppingCacheModel.find({
       toppingId: {
         $in: cartToppingIds,
       },
     });
+    console.log("toppingPricings found:", JSON.stringify(toppingPricings));
 
     const totalPrice = cart.reduce((acc, curr) => {
       const cachedProductPrice = productPricings.find(
         (product) => product.productId === curr._id,
+      );
+      console.log(
+        `For cart item ${curr._id}, cachedProductPrice:`,
+        JSON.stringify(cachedProductPrice),
       );
 
       return (
@@ -233,7 +228,6 @@ export class OrderController {
     );
 
     if (!currentTopping) {
-      // todo: Make sure the item is in the cache else, maybe call catalog service.
       return topping.price;
     }
 
