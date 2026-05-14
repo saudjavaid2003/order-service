@@ -107,6 +107,12 @@ export class OrderController {
       }
     }
 
+    // Payment processing...
+
+    // todo: Error handling...
+
+    // todo: add logging
+
     if (paymentMode === PaymentMode.CARD) {
       const session = await this.paymentGw.createSession({
         amount: finalTotal,
@@ -123,6 +129,7 @@ export class OrderController {
 
     await this.broker.sendMessage("order", JSON.stringify(newOrder));
 
+    // todo: Update order document -> paymentId -> sessionId
     return res.json({ paymentUrl: null });
   };
 
@@ -132,34 +139,71 @@ export class OrderController {
     if (!userId) {
       return next(createHttpError(400, "No userId found."));
     }
-    console.log("userId from token:", userId);
 
+    // todo: Add error handling.
     const customer = await customerModel.findOne({ userId });
-    console.log("customer found:", customer);
 
     if (!customer) {
       return next(createHttpError(400, "No customer found."));
     }
 
+    // todo: implement pagination.
     const orders = await orderModel.find(
       { customerId: customer._id },
       { cart: 0 },
     );
-    console.log("orders found:", orders);
 
     return res.json(orders);
   };
 
+  getSingle = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    const orderId = req.params.orderId;
+    const { sub: userId, role, tenant: tenantId } = req.auth;
+    console.log("userId", userId, "role: ", role, "tenant", tenantId);
+
+    const order = await orderModel.findOne({ _id: orderId });
+    if (!order) {
+      return next(createHttpError(400, "Order does not exists."));
+    }
+
+    // What roles can access this endpoint: Admin, manager (for their own restaurant), customer (own order)
+    if (role === "admin") {
+      return res.json(order);
+    }
+
+    const myRestaurantOrder = order.tenantId === tenantId;
+    if (role === "manager" && myRestaurantOrder) {
+      return res.json(order);
+    }
+
+    if (role === "customer") {
+      const customer = await customerModel.findOne({ userId });
+      console.log("customer", customer);
+      if (!customer) {
+        return next(createHttpError(400, "No customer found."));
+      }
+
+      if (order.customerId.toString() === customer._id.toString()) {
+        return res.json(order);
+      }
+    }
+
+    return next(createHttpError(403, "Operation not permitted."));
+  };
+
   private calculateTotal = async (cart: CartItem[]) => {
     const productIds = cart.map((item) => item._id);
-    console.log("Cart productIds:", productIds);
 
+    // todo: proper error handling..
     const productPricings = await productCacheModel.find({
       productId: {
         $in: productIds,
       },
     });
-    console.log("productPricings found:", JSON.stringify(productPricings));
+
+    // todo: What will happen if product does not exists in the cache
+    // 1. call catalog service.
+    // 2. Use price from cart <- BAD
 
     const cartToppingIds = cart.reduce((acc, item) => {
       return [
@@ -169,22 +213,17 @@ export class OrderController {
         ),
       ];
     }, []);
-    console.log("cartToppingIds:", cartToppingIds);
 
+    // todo: What will happen if topping does not exists in the cache
     const toppingPricings = await toppingCacheModel.find({
       toppingId: {
         $in: cartToppingIds,
       },
     });
-    console.log("toppingPricings found:", JSON.stringify(toppingPricings));
 
     const totalPrice = cart.reduce((acc, curr) => {
       const cachedProductPrice = productPricings.find(
         (product) => product.productId === curr._id,
-      );
-      console.log(
-        `For cart item ${curr._id}, cachedProductPrice:`,
-        JSON.stringify(cachedProductPrice),
       );
 
       return (
@@ -228,6 +267,7 @@ export class OrderController {
     );
 
     if (!currentTopping) {
+      // todo: Make sure the item is in the cache else, maybe call catalog service.
       return topping.price;
     }
 

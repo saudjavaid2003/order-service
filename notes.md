@@ -40,3 +40,12 @@ ma nay jwt token kay ender userId to dhali hoi ha wahan say req.auth say id lay 
 yahan per pagination laghani ha lekin wo end per karian ghay 
 abhi full working project dikhana ha sir ko cart ko response may nai bhejna 
 gend mach jay gha frontend per
+
+
+
+10 
+now i am going to make single order endpoint for that what i will do the logic is that everyone can acess that route but the manager who is realted to taht specific order cna acess it no other manager iwll so i also have to extract tenantId FORM auth token and 
+if(order.tenantId==tenantID)
+okay;
+isko to frontend per bhi kerna paray gha 
+bohat zayada if lagha di hain bad may sahi karoun gha 
