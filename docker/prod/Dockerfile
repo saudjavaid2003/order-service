@@ -1,5 +1,5 @@
 
-ARG NODE_VERSION=21.7.1
+ARG NODE_VERSION=22
 
 FROM node:${NODE_VERSION}-alpine as builder
 
