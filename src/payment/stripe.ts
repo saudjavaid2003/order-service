@@ -27,18 +27,7 @@ export class StripeGW implements PaymentGW {
           restaurantId: options.tenantId,
         },
         billing_address_collection: "required",
-        // todo: In Future, Capture structured address from customer
-        // payment_intent_data: {
-        //     shipping: {
-        //         name: "Rakesh K",
-        //         address: {
-        //             line1: "some line",
-        //             city: "Mumbai",
-        //             country: "India",
-        //             postal_code: "898798"
-        //         }
-        //     }
-        // },
+       
         line_items: [
           {
             price_data: {
@@ -66,7 +55,6 @@ export class StripeGW implements PaymentGW {
       paymentStatus: session.payment_status,
     };
   }
-
   async getSession(id: string) {
     const session = await this.stripe.checkout.sessions.retrieve(id);
 
