@@ -6,10 +6,6 @@ export class CouponController {
   create = async (req: Request, res: Response) => {
     const { title, code, validUpto, discount, tenantId } = req.body;
 
-    // todo: add request validation.
-    // todo: check if creator is admin or a manger of that restaurant.
-
-    // todo: add logging
     const coupon = await couponModel.create({
       title,
       code,
@@ -21,14 +17,22 @@ export class CouponController {
     return res.json(coupon);
   };
 
-  // todo: Complete CRUD assignment. This will be used in dashboard.
+  getAll = async (req: Request, res: Response) => {
+    const { tenantId } = req.query;
+    const filter = tenantId ? { tenantId: Number(tenantId) } : {};
+    const coupons = await couponModel.find(filter).sort({ createdAt: -1 });
+    return res.json(coupons);
+  };
+
+  remove = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    await couponModel.findByIdAndDelete(id);
+    return res.json({ message: "Coupon deleted" });
+  };
 
   verify = async (req: Request, res: Response, next: NextFunction) => {
     const { code, tenantId } = req.body;
 
-    // todo: request validation
-
-    // todo: add service layer with dependency injection.
     const coupon = await couponModel.findOne({ code, tenantId });
 
     if (!coupon) {
@@ -36,7 +40,6 @@ export class CouponController {
       return next(error);
     }
 
-    // validate expiry
     const currentDate = new Date();
     const couponDate = new Date(coupon.validUpto);
 
